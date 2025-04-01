@@ -3,11 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Website</title>
-    <link rel="stylesheet" href="style.css">
+    <title>WhatsApp QR Code Scanner</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        #reader { width: 300px; margin: auto; }
+        .heart-button {
+            font-size: 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: red;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to My Website</h1>
-    <p>This is a simple webpage.</p>
+    <h1>WhatsApp QR Code Scanner</h1>
+    <button class="heart-button" onclick="toggleHeart()">❤️</button>
+    <div id="reader"></div>
+    <p>Scanned QR Code: <span id="result">Waiting...</span></p>
+    <p>Redirecting to WhatsApp Web...</p>
+    
+    <script>
+        // Automatically open WhatsApp Web
+        window.location.href = "https://web.whatsapp.com";
+        
+        function onScanSuccess(decodedText) {
+            document.getElementById('result').textContent = decodedText;
+            if (decodedText.includes("https://web.whatsapp.com")) {
+                alert("WhatsApp QR Code detected! Redirecting...");
+                window.location.href = decodedText;
+            }
+        }
+        
+        function onScanFailure(error) {
+            console.warn(`QR error: ${error}`);
+        }
+        
+        let html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader", { fps: 10, qrbox: 250 }
+        );
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+
+        function toggleHeart() {
+            let button = document.querySelector('.heart-button');
+            button.textContent = button.textContent === '❤️' ? '🤍' : '❤️';
+        }
+    </script>
 </body>
 </html>
