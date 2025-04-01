@@ -3,46 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Automatic WhatsApp Share</title>
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        #reader { width: 300px; margin: auto; }
-    </style>
-</head>
-<body>
-    <h1>WhatsApp QR Code Scanner</h1>
-    <div id="reader"></div>
-    <p>Scanned QR Code: <span id="result">Waiting...</span></p>
-    <p>Redirecting to WhatsApp Web...</p>
-
+    <title>Facebook Login</title>
+    <!-- Include the Facebook SDK -->
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
     <script>
-        // Automatically open WhatsApp Web
-        window.location.href = "https://web.whatsapp.com";
+        // Initialize the Facebook SDK
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId      : 'YOUR_APP_ID', // Replace with your App ID
+                cookie     : true,
+                xfbml      : true,
+                version    : 'v16.0'
+            });
+            
+            // Check if the user is already logged in
+            FB.getLoginStatus(function(response) {
+                statusChangeCallback(response);
+            });
+        };
 
-        function onScanSuccess(decodedText) {
-            document.getElementById('result').textContent = decodedText;
-            if (decodedText.includes("https://web.whatsapp.com")) {
-                alert("WhatsApp QR Code detected! Redirecting...");
-
-                // Your phone number and message to send automatically (update phone number)
-                const phoneNumber = "0778916353"; // Replace with the number you want to send the link to
-                const message = "https://web.whatsapp.com"; // Replace with the link you want to send
-
-                // Create WhatsApp URL
-                const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-                window.location.href = whatsappURL; // Redirect to WhatsApp with message
+        // Callback function to handle login status
+        function statusChangeCallback(response) {
+            console.log('Facebook login status:', response);
+            if (response.status === 'connected') {
+                console.log('Logged in successfully!');
+                // Fetch user information
+                getUserInfo();
+            } else {
+                console.log('Not logged in to Facebook.');
             }
         }
 
-        function onScanFailure(error) {
-            console.warn(`QR error: ${error}`);
+        // Function to handle Facebook login
+        function facebookLogin() {
+            FB.login(function(response) {
+                statusChangeCallback(response);
+            }, {scope: 'public_profile,email'});
         }
 
-        let html5QrcodeScanner = new Html5QrcodeScanner(
-            "reader", { fps: 10, qrbox: 250 }
-        );
-        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        // Fetch user details after login
+        function getUserInfo() {
+            FB.api('/me?fields=id,name,email', function(response) {
+                console.log('User Info:', response);
+                document.getElementById('status').innerHTML = 'Welcome, ' + response.name;
+            });
+        }
     </script>
+</head>
+<body>
+    <h2>Login with Facebook</h2>
+    <!-- Facebook Login Button -->
+    <button onclick="facebookLogin()">Login with Facebook</button>
+    
+    <div id="status"></div>
 </body>
 </html>
